@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  db:
+    build: ./bbdd
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=bookmedik
+      - MYSQL_USER=bookmedik
+      - MYSQL_PASSWORD=secret
+    container_name: bookmedikdb
+
+  app:
+    build: ./app
+    ports:
+      - "80:80"
+    restart: always
+    links:
+      - db
+    volumes:
+      - ./log:/var/log/apache2
+    environment:
+      - MYSQL_HOST=bookmedikdb
+      - MYSQL_DATABASE=bookmedik
+      - MYSQL_USER=bookmedik
+      - MYSQL_PASSWORD=secret
+    depends_on:
+      - db
+    container_name: bookmedikapp
+volumes:
+  db:
+  log:
